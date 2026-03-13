@@ -1,6 +1,14 @@
 import { Client, Environment } from "square"
 import { randomUUID } from "node:crypto"
 
+function safeJson(value) {
+  return JSON.parse(
+    JSON.stringify(value, (_, v) =>
+      typeof v === "bigint" ? v.toString() : v
+    )
+  )
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*")
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
@@ -63,12 +71,14 @@ export default async function handler(req, res) {
       locationId,
     })
 
-    return res.status(200).json(response.result)
+    return res.status(200).json(safeJson(response.result))
   } catch (error) {
-    console.error("Square checkout error:", JSON.stringify(error, null, 2))
-    return res.status(500).json({
-      error: "Checkout failed",
-      detail: error?.errors || error?.message || String(error),
-    })
+    console.error("Square checkout error:", error)
+    return res.status(500).json(
+      safeJson({
+        error: "Checkout failed",
+        detail: error?.errors || error?.message || String(error),
+      })
+    )
   }
 }
