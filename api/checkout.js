@@ -37,6 +37,14 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log("Creating payment with:", {
+      squareEnv,
+      locationId,
+      amount,
+      currency,
+      hasSourceId: !!sourceId,
+    })
+
     const client = new Client({
       environment:
         squareEnv === "production"
@@ -57,6 +65,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json(response.result)
   } catch (error) {
+    console.error("Square checkout error:", JSON.stringify(error, null, 2))
     return res.status(500).json({
       error: "Checkout failed",
       detail: error?.errors || error?.message || String(error),
