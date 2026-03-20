@@ -4,17 +4,8 @@ export default async function handler(req, res) {
   let framer
 
   try {
-    const squareToken = process.env.SQUARE_ACCESS_TOKEN
-    const locationId = process.env.SQUARE_LOCATION_ID
-    const squareEnv = (process.env.SQUARE_ENV || "sandbox").toLowerCase()
-
     const projectUrl = process.env.FRAMER_PROJECT_URL
     const apiKey = process.env.FRAMER_API_KEY
-
-    const baseUrl =
-      squareEnv === "production"
-        ? "https://connect.squareup.com"
-        : "https://connect.squareupsandbox.com"
 
     framer = await connect(projectUrl, apiKey)
 
@@ -28,49 +19,22 @@ export default async function handler(req, res) {
       })
     }
 
+    const fields = await collection.getFields()
     const items = await collection.getItems()
-
-    const response = await fetch(
-      `${baseUrl}/v2/inventory/counts/batch-retrieve`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${squareToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          location_ids: [locationId],
-        }),
-      }
-    )
-
-    const data = await response.json()
-    const counts = data.counts || []
-
-    const debug = items.map((item) => {
-      const rawField = item.fieldData?.squareVariationId
-      const variationId =
-        item.fieldData?.squareVariationId?.value ||
-        item.fieldData?.squareVariationId ||
-        null
-
-      const match = counts.find(
-        (c) => c.catalog_object_id === variationId
-      )
-
-      return {
-        slug: item.slug,
-        itemId: item.id,
-        rawSquareVariationField: rawField ?? null,
-        parsedVariationId: variationId,
-        matchedSquareCount: match || null,
-      }
-    })
 
     return res.status(200).json({
       success: true,
-      counts,
-      debug,
+      collection: {
+        id: collection.id,
+        name: collection.name,
+      },
+      fields: fields.map((f) => ({
+        id: f.id,
+        name: f.name,
+        type: f.type,
+      })),
+      firstItemFieldKeys: items[0] ? Object.keys(items[0].fieldData || {}) : [],
+      firstItemFieldData: items[0]?.fieldData || null,
     })
   } catch (error) {
     return res.status(500).json({
