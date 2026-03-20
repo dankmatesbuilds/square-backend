@@ -10,14 +10,28 @@ export default async function handler(req, res) {
     framer = await connect(projectUrl, apiKey)
 
     const collections = await framer.getCollections()
+    const productsCollection = collections.find((c) => c.id === "rfMZuERik")
+
+    if (!productsCollection) {
+      return res.status(404).json({
+        ok: false,
+        error: "Products collection not found",
+      })
+    }
+
+    const items = await productsCollection.getItems()
 
     return res.status(200).json({
       ok: true,
-      collectionCount: collections.length,
-      collections: collections.map((c) => ({
-        id: c.id,
-        name: c.name,
-        slug: c.slug,
+      collection: {
+        id: productsCollection.id,
+        name: productsCollection.name,
+      },
+      itemCount: items.length,
+      items: items.map((item) => ({
+        id: item.id,
+        slug: item.slug,
+        fieldData: item.fieldData,
       })),
     })
   } catch (error) {
