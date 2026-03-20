@@ -10,37 +10,15 @@ export default async function handler(req, res) {
     framer = await connect(projectUrl, apiKey)
 
     const collections = await framer.getCollections()
-    const collection = collections.find((c) => c.id === "rfMZuERik")
-
-    if (!collection) {
-      return res.status(404).json({
-        ok: false,
-        error: "Collection not found",
-      })
-    }
-
-    const fields = await collection.getFields()
-    const items = await collection.getItems()
 
     return res.status(200).json({
       ok: true,
-      collection: {
-        id: collection.id,
-        name: collection.name,
-      },
-      fields: fields.map((f) => ({
-        id: f.id,
-        name: f.name,
-        type: f.type,
-      })),
-      firstItem: items[0]
-        ? {
-            id: items[0].id,
-            slug: items[0].slug,
-            fieldData: items[0].fieldData,
-          }
-        : null,
+      collections: collections.map(c => ({
+        id: c.id,
+        name: c.name
+      }))
     })
+
   } catch (error) {
     return res.status(500).json({
       ok: false,
