@@ -47,34 +47,32 @@ export default async function handler(req, res) {
     const data = await response.json()
     const counts = data.counts || []
 
-    console.log("SQUARE COUNTS:", JSON.stringify(counts, null, 2))
-
-    for (const item of items) {
-      console.log("ITEM SLUG:", item.slug)
-      console.log("FULL FIELD DATA:", JSON.stringify(item.fieldData, null, 2))
-
+    const debug = items.map((item) => {
+      const rawField = item.fieldData?.squareVariationId
       const variationId =
         item.fieldData?.squareVariationId?.value ||
         item.fieldData?.squareVariationId ||
-        item.fieldData?.["squareVariationId"]?.value ||
-        item.fieldData?.["squareVariationId"]
-
-      console.log("READ VARIATION ID:", variationId)
+        null
 
       const match = counts.find(
         (c) => c.catalog_object_id === variationId
       )
 
-      console.log("MATCH FOUND:", JSON.stringify(match, null, 2))
-    }
+      return {
+        slug: item.slug,
+        itemId: item.id,
+        rawSquareVariationField: rawField ?? null,
+        parsedVariationId: variationId,
+        matchedSquareCount: match || null,
+      }
+    })
 
     return res.status(200).json({
       success: true,
-      totalSquareItems: counts.length,
-      checkedItems: items.length,
+      counts,
+      debug,
     })
   } catch (error) {
-    console.error("SYNC ERROR:", error)
     return res.status(500).json({
       success: false,
       error: error.message,
