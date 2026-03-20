@@ -9,13 +9,19 @@ export default async function handler(req, res) {
         ? "https://connect.squareup.com"
         : "https://connect.squareupsandbox.com"
 
-    const response = await fetch(`${baseUrl}/v2/locations`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${squareToken}`,
-        "Content-Type": "application/json",
-      },
-    })
+    const response = await fetch(
+      `${baseUrl}/v2/inventory/counts/batch-retrieve`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${squareToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          location_ids: [locationId],
+        }),
+      }
+    )
 
     const data = await response.json()
 
@@ -23,7 +29,6 @@ export default async function handler(req, res) {
       ok: response.ok,
       environment: squareEnv,
       baseUrl,
-      locationId,
       squareResponse: data,
     })
   } catch (error) {
