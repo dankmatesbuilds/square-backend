@@ -47,19 +47,25 @@ export default async function handler(req, res) {
     const data = await response.json()
     const counts = data.counts || []
 
+    console.log("SQUARE COUNTS:", JSON.stringify(counts, null, 2))
+
     for (const item of items) {
+      console.log("ITEM SLUG:", item.slug)
+      console.log("FULL FIELD DATA:", JSON.stringify(item.fieldData, null, 2))
+
       const variationId =
         item.fieldData?.squareVariationId?.value ||
-        item.fieldData?.squareVariationId
+        item.fieldData?.squareVariationId ||
+        item.fieldData?.["squareVariationId"]?.value ||
+        item.fieldData?.["squareVariationId"]
 
-      console.log("FRAMER ITEM:", item.slug)
-      console.log("VARIATION ID:", variationId)
+      console.log("READ VARIATION ID:", variationId)
 
       const match = counts.find(
         (c) => c.catalog_object_id === variationId
       )
 
-      console.log("MATCH FOUND:", match)
+      console.log("MATCH FOUND:", JSON.stringify(match, null, 2))
     }
 
     return res.status(200).json({
@@ -68,6 +74,7 @@ export default async function handler(req, res) {
       checkedItems: items.length,
     })
   } catch (error) {
+    console.error("SYNC ERROR:", error)
     return res.status(500).json({
       success: false,
       error: error.message,
