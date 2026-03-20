@@ -88,17 +88,29 @@ export default async function handler(req, res) {
         inventoryStatus = "low_stock"
       }
 
-      await collection.addItems([
-        {
-          id: item.id,
-          fieldData: {
-            yUbHwMGoF: quantity,
-            IrXq4lgw1: inventoryStatus,
-            UtUDuijUm: availableForPurchase,
-            HFYkfE7mN: new Date().toISOString(),
-          },
-        },
-      ])
+  await collection.addItems([
+  {
+    id: item.id,
+    fieldData: {
+      yUbHwMGoF: {
+        type: "number",
+        value: quantity,
+      },
+      IrXq4lgw1: {
+        type: "string",
+        value: inventoryStatus,
+      },
+      UtUDuijUm: {
+        type: "boolean",
+        value: availableForPurchase,
+      },
+      HFYkfE7mN: {
+        type: "date",
+        value: new Date().toISOString(),
+      },
+    },
+  },
+])
 
       updatedItems++
 
