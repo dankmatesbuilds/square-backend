@@ -37,4 +37,13 @@ Notes
 
 
 
-# AL testing 4/1/2026
+URLS:
+
+Project:
+
+https://project-r9nhw.vercel.app/
+
+Cleaner, using same project server:
+
+https://square-backend-tawny.vercel.app/api/checkout
+
